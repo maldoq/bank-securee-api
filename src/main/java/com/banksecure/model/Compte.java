@@ -26,6 +26,8 @@ public class Compte {
 
     private BigDecimal solde;
 
+    private Boolean actif = true;
+
     @ManyToOne
     @JoinColumn(name = "utilisateur_id")
     private Utilisateur proprietaire;
