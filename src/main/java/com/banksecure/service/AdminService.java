@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.banksecure.dto.UserResponse;
 import com.banksecure.dto.admin.CreateUserRequest;
 import com.banksecure.dto.admin.UpdateUserRequest;
 import com.banksecure.model.Utilisateur;
@@ -18,15 +19,29 @@ public class AdminService {
     private final UtilisateurRepository utilisateurRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public List<Utilisateur> getAllUsers (){
-        return utilisateurRepository.findAll();
+    private UserResponse mapToResponse(Utilisateur user) {
+        UserResponse response = new UserResponse();
+        response.setId(user.getId());
+        response.setEmail(user.getEmail());
+        response.setRole(user.getRole());
+        response.setActif(user.isActif());
+        return response;
     }
 
-    public Utilisateur getUserById(Long id){
-        return utilisateurRepository.findById(id).orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+    private Utilisateur getUserEntity(Long id) {
+    return utilisateurRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+}
+
+    public List<UserResponse> getAllUsers (){
+        return utilisateurRepository.findAll().stream().map(this::mapToResponse).toList();
     }
 
-    public Utilisateur createUser(CreateUserRequest request){
+    public UserResponse getUserById(Long id){
+        return mapToResponse(utilisateurRepository.findById(id).orElseThrow(() -> new RuntimeException("Utilisateur non trouvé")));
+    }
+
+    public UserResponse createUser(CreateUserRequest request){
         if (utilisateurRepository.existsByEmail(request.getEmail())){
             throw new RuntimeException("Email déjà utilisé");
         }
@@ -36,11 +51,11 @@ public class AdminService {
         utilisateur.setMotDePasse(passwordEncoder.encode(request.getMotDePasse()));
         utilisateur.setRole(request.getRole());
 
-        return utilisateurRepository.save(utilisateur);
+        return mapToResponse(utilisateurRepository.save(utilisateur));
     }
 
-    public Utilisateur updateUser(Long id, UpdateUserRequest request){
-        Utilisateur utilisateur = getUserById(id);
+    public UserResponse updateUser(Long id, UpdateUserRequest request){
+        Utilisateur utilisateur = getUserEntity(id);
 
         if (request.getEmail() != null){
             utilisateur.setEmail(request.getEmail());
@@ -54,7 +69,7 @@ public class AdminService {
             utilisateur.setActif(request.getActif());
         }
 
-        return utilisateurRepository.save(utilisateur);
+        return mapToResponse(utilisateurRepository.save(utilisateur));
     }
 
     public String deleteUser(Long id){
