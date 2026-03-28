@@ -11,6 +11,7 @@ import com.banksecure.dto.LoginRequest;
 import com.banksecure.dto.RegisterRequest;
 import com.banksecure.service.AuthService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 
@@ -43,10 +44,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
         //TODO: process POST request
         
-        return ResponseEntity.ok(authService.login(request));
+        return ResponseEntity.ok(authService.login(request, httpRequest.getRemoteAddr())); // Appelle le service d'authentification pour connecter l'utilisateur et retourne la réponse avec le token
     }
     
     
