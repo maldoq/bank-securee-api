@@ -1,9 +1,10 @@
 package com.banksecure.service;
 
-import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
 import java.util.List;
+
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 
 import com.banksecure.dto.admin.CompteResponse;
 import com.banksecure.dto.admin.CreateCompteRequest;
@@ -12,6 +13,8 @@ import com.banksecure.model.Compte;
 import com.banksecure.model.Utilisateur;
 import com.banksecure.repository.CompteRepository;
 import com.banksecure.repository.UtilisateurRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -89,9 +92,42 @@ public class CompteService {
     // Partie Client
 
     // Un client ne voit que ses propres comptes
-    @PreAuthorize("hasRole('CLIENT') and #email == authentication.name")
-    public List<Compte> getComptesParClient(String email){
-        return compteRepository.findByProprietaireEmail(email);
+    @PreAuthorize("hasRole('CLIENT')")
+    public List<CompteResponse> getMesComptes() {
+
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        return compteRepository.findByProprietaireEmail(email)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    // Un client ne peut voir que les détails de ses propres comptes
+    // @PreAuthorize("hasRole('CLIENT')")
+    // public CompteResponse getMonCompteParId(Long id) {
+    //     String email = SecurityContextHolder.getContext()
+    //             .getAuthentication()
+    //             .getName();
+
+    //     Compte compte = compteRepository.findById(id)
+    //             .orElseThrow(() -> new RuntimeException("Compte introuvable"));
+
+    //     if (!compte.getProprietaire().getEmail().equals(email)) {
+    //         throw new RuntimeException("Accès refusé");
+    //     }
+
+    //     return mapToResponse(compte);
+    // }
+    @PreAuthorize("hasRole('CLIENT') and @securityService.estProprietaire(#id)")
+    public CompteResponse getMonCompteParId(Long id) {
+
+        Compte compte = compteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Compte introuvable"));
+
+        return mapToResponse(compte);
     }
 
 }

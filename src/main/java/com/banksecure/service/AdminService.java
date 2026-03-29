@@ -29,9 +29,9 @@ public class AdminService {
     }
 
     private Utilisateur getUserEntity(Long id) {
-    return utilisateurRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-}
+        return utilisateurRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+    }
 
     public List<UserResponse> getAllUsers (){
         return utilisateurRepository.findAll().stream().map(this::mapToResponse).toList();
