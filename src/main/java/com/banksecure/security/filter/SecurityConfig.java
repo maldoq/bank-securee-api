@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/comptes/**").authenticated()
                 .requestMatchers("/error").permitAll()
                 .anyRequest().denyAll())
-                // .httpBasic(Customizer.withDefaults())
+                .httpBasic(Customizer.withDefaults())
                 .headers(headers -> headers
             .frameOptions(frame -> frame.deny())
             .httpStrictTransportSecurity(hsts -> hsts
