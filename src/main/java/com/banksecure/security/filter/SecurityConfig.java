@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final RateLimitFilter rateLimitFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     @Bean // Indique que cette méthode produit un bean géré par Spring
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -37,9 +38,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/client/**").hasRole("CLIENT")
                 .requestMatchers("/api/comptes/**").authenticated()
                 .requestMatchers("/error").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
                 .anyRequest().denyAll())
-                .httpBasic(Customizer.withDefaults())
+                // .httpBasic(Customizer.withDefaults())
                 .headers(headers -> headers
             .frameOptions(frame -> frame.deny())
             .httpStrictTransportSecurity(hsts -> hsts
@@ -50,6 +50,7 @@ public class SecurityConfig {
                     .policyDirectives("default-src 'self'; frame-ancestors 'none'")
                 )
             )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

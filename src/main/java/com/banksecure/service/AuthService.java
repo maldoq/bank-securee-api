@@ -85,11 +85,6 @@ public class AuthService {
             throw new RuntimeException("Email ou mot de passe incorrect");
         }
 
-        if (!passwordEncoder.matches(request.getMotDePasse(), user.getMotDePasse())) {
-            rateLimitFilter.enregistrerEchec(ip);
-            throw new RuntimeException("Mot de passe incorrect");
-        }
-
         if (!user.isActif()) {
             throw new RuntimeException("Compte désactivé");
         }
